@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Fundación Verde Esperanza",
+    "description_es": "Promueve la conservación ambiental y la educación ecológica en comunidades rurales.",
+    "description_en": "Promotes environmental conservation and ecological education in rural communities.",
+    "type": "fundacion",
+    "focus": "conservacion_recursos",
+    "country": "Colombia",
+    "lat": 4.711,
+    "lng": -74.072,
+    "website": "https://fundacionverde.org",
+    "email": "contacto@fundacionverde.org",
+    "phone": "+57 310 555 1234"
+  },
+  {
+    "name": "Movimiento Juventud Sustentable",
+    "description_es": "Organización juvenil enfocada en impulsar políticas de sostenibilidad y energías limpias.",
+    "description_en": "Youth organization focused on promoting sustainability policies and clean energy initiatives.",
+    "type": "movimiento_social",
+    "focus": "transicion_energetica",
+    "country": "México",
+    "lat": 19.4326,
+    "lng": -99.1332,
+    "website": "https://juventudsustentable.mx",
+    "email": "info@juventudsustentable.mx",
+    "phone": "+52 55 1234 5678"
+  }
+]
