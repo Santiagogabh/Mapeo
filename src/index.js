@@ -1,15 +1,12 @@
+import 'leaflet/dist/leaflet.css';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ReactDOM from 'react-dom/client';
 import App from './App';
+import './input.css';
 
-
-
-const queryClient = new QueryClient();
-
-const root = createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <QueryClientProvider client={queryClient}>
+  <React.StrictMode>
     <App />
-  </QueryClientProvider>
+  </React.StrictMode>
 );
