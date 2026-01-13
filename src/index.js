@@ -6,6 +6,8 @@ import './input.css';
 
 // Función para renderizar en un contenedor específico
 const renderApp = (containerIdOrElement) => {
+  console.log('renderApp llamada con:', containerIdOrElement);
+  
   let container;
   
   if (typeof containerIdOrElement === 'string') {
@@ -13,6 +15,8 @@ const renderApp = (containerIdOrElement) => {
   } else {
     container = containerIdOrElement;
   }
+  
+  console.log('container encontrado:', container);
   
   if (!container) {
     console.error('Contenedor no válido:', containerIdOrElement);
@@ -32,17 +36,15 @@ const renderApp = (containerIdOrElement) => {
   }
 };
 
-// Asegurar que window.MapeoApp está disponible ANTES de cualquier otra cosa
-if (!window.MapeoApp) {
-  window.MapeoApp = renderApp;
-}
+// IMPORTANTE: Asignar a window INMEDIATAMENTE y de forma global
+window.MapeoApp = renderApp;
+window.mapeoApp = renderApp;
 
-console.log('✓ window.MapeoApp disponible:', typeof window.MapeoApp);
+console.log('✓ window.MapeoApp asignado:', typeof window.MapeoApp);
+console.log('✓ window.mapeoApp asignado:', typeof window.mapeoApp);
 
 // Para desarrollo local
-setTimeout(() => {
-  const rootElement = document.getElementById('root');
-  if (rootElement) {
-    renderApp('root');
-  }
-}, 0);
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  renderApp('root');
+}
