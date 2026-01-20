@@ -2,11 +2,17 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
+  mode: 'development',
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
-    publicPath: '/'
+    path: path.resolve(__dirname, 'dist'),
+    library: {
+      name: 'MapeoApp', // ← Cambiar a MapeoApp (sin "Lib")
+      type: 'window',
+      export: 'default',
+    },
+    clean: true, // ← Limpiar dist antes de cada build
   },
   module: {
     rules: [
@@ -22,7 +28,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader', 'postcss-loader'] // agregado postcss-loader
+        use: ['style-loader', 'css-loader', 'postcss-loader']
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
@@ -32,7 +38,7 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.jsx'],
-    alias: { // agregado alias
+    alias: {
       '@': path.resolve(__dirname, 'src')
     }
   },

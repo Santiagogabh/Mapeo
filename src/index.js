@@ -4,47 +4,70 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './input.css';
 
-// Función para renderizar en un contenedor específico
-const renderApp = (containerIdOrElement) => {
-  console.log('renderApp llamada con:', containerIdOrElement);
+console.log('📦 index.js cargado');
+
+const rootInstances = new WeakMap();
+
+function renderMapeoApp(container) {
+  console.log('renderMapeoApp llamada para:', container);
   
-  let container;
-  
-  if (typeof containerIdOrElement === 'string') {
-    container = document.getElementById(containerIdOrElement);
-  } else {
-    container = containerIdOrElement;
+  if (!container || !(container instanceof HTMLElement)) {
+    console.error('❌ Container inválido:', container);
+    return false;
   }
-  
-  console.log('container encontrado:', container);
-  
-  if (!container) {
-    console.error('Contenedor no válido:', containerIdOrElement);
-    return;
+
+  if (rootInstances.has(container)) {
+    console.warn('⚠️ Este contenedor ya tiene un root');
+    return true;
+  }
+
+  if (container.hasAttribute('data-mapeo-initialized')) {
+    console.warn('⚠️ Ya inicializado');
+    return true;
   }
 
   try {
+    console.log('✨ Creando root de React...');
     const root = ReactDOM.createRoot(container);
+    rootInstances.set(container, root);
+    
     root.render(
       <React.StrictMode>
         <App />
       </React.StrictMode>
     );
-    console.log('✓ App renderizada correctamente');
+    
+    container.setAttribute('data-mapeo-initialized', 'true');
+    console.log('✅ App renderizada correctamente');
+    return true;
   } catch (error) {
-    console.error('✗ Error al renderizar:', error);
+    console.error('❌ Error al renderizar:', error);
+    container.innerHTML = `
+      <div style="padding:20px;background:#fee;border:1px solid #c00;border-radius:4px;margin:10px 0;">
+        <strong>⚠️ Error al cargar Mapeo:</strong><br>
+        <code>${error.message}</code>
+      </div>
+    `;
+    return false;
   }
-};
-
-// IMPORTANTE: Asignar a window INMEDIATAMENTE y de forma global
-window.MapeoApp = renderApp;
-window.mapeoApp = renderApp;
-
-console.log('✓ window.MapeoApp asignado:', typeof window.MapeoApp);
-console.log('✓ window.mapeoApp asignado:', typeof window.mapeoApp);
-
-// Para desarrollo local
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  renderApp('root');
 }
+
+// 🔧 Para desarrollo local (opcional)
+if (process.env.NODE_ENV === 'development') {
+  const initDev = () => {
+    const devRoot = document.getElementById('root');
+    if (devRoot && !devRoot.hasAttribute('data-mapeo-initialized')) {
+      console.log('🔧 Modo desarrollo: renderizando en #root');
+      renderMapeoApp(devRoot);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDev);
+  } else {
+    initDev();
+  }
+}
+
+// ⚠️ IMPORTANTE: webpack expondrá esto como window.MapeoApp
+export default renderMapeoApp;

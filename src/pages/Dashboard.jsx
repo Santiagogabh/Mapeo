@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-leaflet";
-import { Filter, X, Globe, Building2, Layers, Search, List, Map as MapIcon } from "lucide-react";
+import { X, Globe, Building2, Layers, Search, List, Map as MapIcon } from "lucide-react";
 import L from 'leaflet';
 
-// Fix para los iconos de Leafletf
+// Fix para los iconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -142,8 +142,8 @@ const COUNTRY_COORDINATES = {
   "Zimbabue": { lat: -17.8252, lng: 31.0335 }
 };
 
-// Datos de organizaciones con estructura completa
-const organizationsData = [
+// Datos de organizaciones
+const organizationsData =  [
   {
     id: 1,
     name: "UMI Fund",
@@ -12895,23 +12895,8 @@ const organizationsData = [
     email: "info@thirdwavefund.org"
   }
 ];
- 
 
-// Continentes para el filtro de Impacto Financiero
-const CONTINENTS = [
-  { id: "africa", name_es: "África", name_en: "Africa" },
-  { id: "asia", name_es: "Asia", name_en: "Asia" },
-  { id: "europa", name_es: "Europa", name_en: "Europe" },
-  { id: "america_norte", name_es: "América del Norte", name_en: "North America" },
-  { id: "america_central", name_es: "América Central", name_en: "Central America" },
-  { id: "america_sur", name_es: "América del Sur", name_en: "South America" },
-  { id: "oceania", name_es: "Oceanía", name_en: "Oceania" }
-];
-
-// Lista de todos los países únicos
-const ALL_COUNTRIES = Object.keys(COUNTRY_COORDINATES).sort();
-
-// Custom hook to update map view with smooth animation
+// Custom hook to update map view
 function ChangeView({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
@@ -12923,7 +12908,7 @@ function ChangeView({ center, zoom }) {
   return null;
 }
 
-// Componente de Marcadores Agrupados
+// Componente de Marcadores
 function ClusteredMarkers({ markers, onOrganizationsClick, language }) {
   if (!markers || markers.length === 0) {
     return null;
@@ -12964,7 +12949,7 @@ function ClusteredMarkers({ markers, onOrganizationsClick, language }) {
   );
 }
 
-// Componente de Modal de Organización
+// Componente de Modal mejorado
 function OrganizationModal({ organizations, onClose, language }) {
   const t = {
     es: {
@@ -12977,7 +12962,8 @@ function OrganizationModal({ organizations, onClose, language }) {
       orgType: "Tipo de Organización",
       description: "Descripción",
       location: "Ubicación",
-      financialImpact: "Impacto Financiero"
+      financialImpact: "Impacto Financiero",
+      seeMore: "Ver más en lista"
     },
     en: {
       close: "Close",
@@ -12989,111 +12975,126 @@ function OrganizationModal({ organizations, onClose, language }) {
       orgType: "Organization Type",
       description: "Description",
       location: "Location",
-      financialImpact: "Financial Impact"
+      financialImpact: "Financial Impact",
+      seeMore: "See more in list"
     }
   };
   
   const texts = t[language];
   
+  // Limitar a 40 organizaciones
+  const displayedOrgs = organizations.slice(0, 40);
+  const hasMore = organizations.length > 40;
+  
   return (
     <>
-      {/* Overlay difuminado */}
       <div 
         className="fixed inset-0 bg-opacity-50 backdrop-blur-sm z-[1000] transition-opacity duration-300"
         onClick={onClose}
         style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(15, 23, 42, 0.5)' }}
       />
       
-      {/* Modal centrado */}
       <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
         <div 
-          className="rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col"
+          className="rounded-3xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col"
           onClick={(e) => e.stopPropagation()}
           style={{ backgroundColor: '#FFFFFF' }}
         >
-          {/* Header */}
-          <div className="px-8 py-6 border-b" style={{ backgroundColor: '#E5E7EB', borderColor: '#E5E7EB' }}>
-            <div className="flex justify-between items-start">
+          {/* Header Premium */}
+          <div 
+            className="px-8 py-8 border-b relative overflow-hidden"
+            style={{ 
+              background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)',
+              borderColor: '#E5E7EB'
+            }}
+          >
+            <div className="relative z-10 flex justify-between items-start">
               <div>
-                <h2 className="text-2xl font-bold mb-1 font-cursive" style={{ color: '#0F172A' }}>
+                <h2 
+                  className="text-4xl font-bold mb-2"
+                  style={{ 
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    color: '#FFFFFF',
+                    letterSpacing: '0px',
+                    fontWeight: '900'
+                  }}
+                >
                   {organizations[0]?.country}
                 </h2>
-                <p className="text-sm" style={{ color: '#0F172A' }}>
-                  {organizations.length} {texts.organizations}
+                <p className="text-lg font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                  {displayedOrgs.length} {texts.organizations}
+                  {hasMore && ` (${organizations.length} ${texts.organizations})`}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg transition-all hover:opacity-80"
-                style={{ backgroundColor: '#E5E7EB', color: '#0F172A' }}
+                className="p-2 rounded-full transition-all hover:bg-white hover:bg-opacity-20"
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#FFFFFF' }}
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
           </div>
           
-          {/* Lista de organizaciones con scroll */}
+          {/* Aviso si hay más organizaciones */}
+          {hasMore && (
+            <div 
+              className="px-8 py-3 border-b text-sm font-medium flex items-center justify-between"
+              style={{ backgroundColor: '#FEF3C7', borderColor: '#FCD34D', color: '#92400E' }}
+            >
+              <span>Se muestran 40 de {organizations.length} organizaciones</span>
+              <span style={{ fontSize: '0.875rem' }}>Ver la lista completa en la pestaña "Vista Lista"</span>
+            </div>
+          )}
+          
+          {/* Lista con scroll */}
           <div className="flex-1 overflow-y-auto px-8 py-6">
             <div className="space-y-5">
-              {organizations.map((org) => (
+              {displayedOrgs.map((org, index) => (
                 <div 
                   key={org.id} 
-                  className="rounded-lg p-6 border transition-all hover:opacity-90"
+                  className="rounded-2xl p-6 border-2 transition-all hover:shadow-lg hover:border-green-400"
                   style={{
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: index % 2 === 0 ? '#F9FAFB' : '#FFFFFF',
                     borderColor: '#E5E7EB'
                   }}
                 >
-                  {/* Nombre */}
-                  <h3 className="text-xl font-bold mb-4" style={{ color: '#0F172A' }}>
-                    {org.name}
-                  </h3>
-                  
-                  {/* Cómo trabajan */}
-                  {org.como_trabajan && (
-                    <div className="mb-4">
-                      <h4 className="font-semibold mb-2" style={{ color: '#22C55E' }}>
-                        {texts.workMethodology}
-                      </h4>
-                      <p className="text-sm leading-relaxed" style={{ color: '#0F172A' }}>
-                        {language === 'es' 
-                          ? (org.como_trabajan.es || org.como_trabajan) 
-                          : (org.como_trabajan.en || org.como_trabajan)}
-                      </p>
+                  {/* Nombre con número */}
+                  <div className="flex items-start gap-3 mb-4">
+                    <div 
+                      className="rounded-full px-3 py-1 text-sm font-bold flex-shrink-0"
+                      style={{ backgroundColor: '#22C55E', color: '#FFFFFF' }}
+                    >
+                      {index + 1}
                     </div>
-                  )}
-                  
-                  {/* Enfoque */}
-                  {org.enfoque && (
-                    <div className="mb-4">
-                      <h4 className="font-semibold mb-2" style={{ color: '#22C55E' }}>
-                        {texts.focus}
-                      </h4>
-                      <p className="text-sm" style={{ color: '#0F172A' }}>
-                        {language === 'es' ? (org.enfoque.es || org.enfoque) : (org.enfoque.en || org.enfoque)}
-                      </p>
-                    </div>
-                  )}
-                  
-                  {/* Tipo de Organización */}
-                  {org.tipo_de_org && (
-                    <div className="mb-4">
-                      <h4 className="font-semibold mb-2" style={{ color: '#22C55E' }}>
-                        {texts.orgType}
-                      </h4>
-                      <p className="text-sm" style={{ color: '#0F172A' }}>
-                        {language === 'es' ? (org.tipo_de_org.es || org.tipo_de_org) : (org.tipo_de_org.en || org.tipo_de_org)}
-                      </p>
-                    </div>
-                  )}
+                    <h3 
+                      className="font-bold flex-grow"
+                      style={{ 
+                        fontFamily: 'Arial, sans-serif',
+                        color: '#0F172A',
+                        fontSize: '1.125rem'
+                      }}
+                    >
+                      {org.name}
+                    </h3>
+                  </div>
                   
                   {/* Descripción */}
                   {(org.description_es || org.description_en) && (
                     <div className="mb-4">
-                      <h4 className="font-semibold mb-2" style={{ color: '#22C55E' }}>
+                      <h4 
+                        className="font-bold mb-2"
+                        style={{ 
+                          fontFamily: 'Arial, sans-serif',
+                          color: '#22C55E', 
+                          textTransform: 'uppercase', 
+                          letterSpacing: '0.5px',
+                          fontSize: '0.9375rem'
+                        }}
+                      >
                         {texts.description}
                       </h4>
-                      <p className="text-sm leading-relaxed" style={{ color: '#0F172A' }}>
+                      <p className="text-xs leading-relaxed" style={{ color: '#0F172A' }}>
                         {language === 'es' ? org.description_es : org.description_en}
                       </p>
                     </div>
@@ -13102,48 +13103,123 @@ function OrganizationModal({ organizations, onClose, language }) {
                   {/* Impacto Financiero */}
                   {org.impacto_financiero && (
                     <div className="mb-4">
-                      <h4 className="font-semibold mb-2" style={{ color: '#22C55E' }}>
+                      <h4 
+                        className="font-bold mb-2"
+                        style={{ 
+                          fontFamily: 'Arial, sans-serif',
+                          color: '#22C55E', 
+                          textTransform: 'uppercase', 
+                          letterSpacing: '0.5px',
+                          fontSize: '0.9375rem'
+                        }}
+                      >
                         {texts.financialImpact}
                       </h4>
-                      <p className="text-sm" style={{ color: '#0F172A' }}>
+                      <p className="text-xs leading-relaxed" style={{ color: '#0F172A' }}>
                         {language === 'es' ? (org.impacto_financiero.es || org.impacto_financiero) : (org.impacto_financiero.en || org.impacto_financiero)}
                       </p>
                     </div>
                   )}
                   
-                  {/* Contacto */}
-                  <div className="pt-4 border-t space-y-2" style={{ borderColor: '#E5E7EB' }}>
-                    {org.website && (
-                      <a 
-                        href={org.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex items-center gap-2 text-sm transition-colors hover:underline"
-                        style={{ color: '#22C55E' }}
+                  {/* Cómo trabajan */}
+                  {org.como_trabajan && (
+                    <div className="mb-4">
+                      <h4 
+                        className="font-bold mb-2"
+                        style={{ 
+                          fontFamily: 'Arial, sans-serif',
+                          color: '#22C55E', 
+                          textTransform: 'uppercase', 
+                          letterSpacing: '0.5px',
+                          fontSize: '0.9375rem'
+                        }}
                       >
-                        <Globe className="w-4 h-4" />
-                        <span>{texts.website}</span>
-                      </a>
-                    )}
-                    
-                    {org.email && (
-                      <div className="flex items-center gap-2 text-sm" style={{ color: '#0F172A' }}>
-                        <span className="w-4 h-4 flex items-center justify-center text-xs">@</span>
-                        <span>{org.email}</span>
-                      </div>
-                    )}
-                  </div>
+                        {texts.workMethodology}
+                      </h4>
+                      <p className="text-xs leading-relaxed" style={{ color: '#0F172A' }}>
+                        {language === 'es' ? (org.como_trabajan.es || org.como_trabajan) : (org.como_trabajan.en || org.como_trabajan)}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Enfoque */}
+                  {org.enfoque && (
+                    <div className="mb-4">
+                      <h4 
+                        className="font-bold mb-2"
+                        style={{ 
+                          fontFamily: 'Arial, sans-serif',
+                          color: '#22C55E', 
+                          textTransform: 'uppercase', 
+                          letterSpacing: '0.5px',
+                          fontSize: '0.9375rem'
+                        }}
+                      >
+                        {texts.focus}
+                      </h4>
+                      <p className="text-xs leading-relaxed" style={{ color: '#0F172A' }}>
+                        {language === 'es' ? (org.enfoque.es || org.enfoque) : (org.enfoque.en || org.enfoque)}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Tipo de Organización */}
+                  {org.tipo_de_org && (
+                    <div className="mb-4">
+                      <h4 
+                        className="font-bold mb-2"
+                        style={{ 
+                          fontFamily: 'Arial, sans-serif',
+                          color: '#22C55E', 
+                          textTransform: 'uppercase', 
+                          letterSpacing: '0.5px',
+                          fontSize: '0.9375rem'
+                        }}
+                      >
+                        {texts.orgType}
+                      </h4>
+                      <p className="text-xs" style={{ color: '#0F172A' }}>
+                        {language === 'es' ? (org.tipo_de_org.es || org.tipo_de_org) : (org.tipo_de_org.en || org.tipo_de_org)}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Contacto */}
+                  {(org.website || org.email) && (
+                    <div className="pt-4 border-t space-y-2" style={{ borderColor: '#E5E7EB' }}>
+                      {org.email && (
+                        <div className="flex items-center gap-2 text-xs" style={{ color: '#0F172A' }}>
+                          <span style={{ fontSize: '0.875rem' }}>📧</span>
+                          <span className="break-all font-semibold">{org.email}</span>
+                        </div>
+                      )}
+                      
+                      {org.website && (
+                        <a 
+                          href={`https://${org.website}`}
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-2 text-xs hover:underline"
+                          style={{ color: '#22C55E' }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Globe className="w-3 h-3" />
+                          <span className="font-semibold">{org.website}</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
           
           {/* Footer */}
-          <div className="px-8 py-5 border-t" style={{ backgroundColor: '#E5E7EB', borderColor: '#E5E7EB' }}>
+          <div className="px-8 py-5 border-t" style={{ backgroundColor: '#F3F4F6', borderColor: '#E5E7EB' }}>
             <button
               onClick={onClose}
-              className="w-full rounded-lg py-3 font-semibold transition-all hover:opacity-90"
-              style={{ backgroundColor: '#22C55E', color: '#FFFFFF' }}
+              className="w-full rounded-xl py-3 font-bold transition-all hover:opacity-90"
+              style={{ backgroundColor: '#22C55E', color: '#FFFFFF', fontSize: '1rem' }}
             >
               {texts.close}
             </button>
@@ -13158,7 +13234,6 @@ function OrganizationModal({ organizations, onClose, language }) {
 export default function Dashboard() {
   const [language, setLanguage] = useState('es');
   const [filters, setFilters] = useState({
-    type: "all",
     focus: "all",
     continent: "all",
     country: "all",
@@ -13166,30 +13241,22 @@ export default function Dashboard() {
   });
   const [selectedOrganization, setSelectedOrganization] = useState(null);
   const [showFilters, setShowFilters] = useState(true);
-  const [showRegionSelector, setShowRegionSelector] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState(null);
-  const [mapCenter, setMapCenter] = useState([20, 0]);
-  const [mapZoom, setMapZoom] = useState(2);
   const [searchQuery, setSearchQuery] = useState('');
   const [countrySearch, setCountrySearch] = useState('');
-  const [viewMode, setViewMode] = useState('map'); // 'map' o 'list'
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('map');
 
   const translations = {
     es: {
-      title: "Mapa de Organizaciones",
+      title: "Re-action map",
       filters: "Filtros",
       hideFilters: "Ocultar Filtros",
       showFilters: "Mostrar Filtros",
-      regions: "Regiones",
-      hideRegions: "Ocultar Regiones",
-      showRegions: "Mostrar Regiones",
       organizations: "organizaciones",
       filteredBy: "Filtrado por",
-      type: "Tipo",
       focus: "Enfoque",
       country: "País",
       financialImpact: "Impacto Financiero",
-      allTypes: "Todos los tipos",
       allFocus: "Todos los enfoques",
       allCountries: "Todos los países",
       allContinents: "Todos los continentes",
@@ -13199,52 +13266,39 @@ export default function Dashboard() {
       mapView: "Vista Mapa",
       listView: "Vista Lista",
       viewDetails: "Ver detalles",
-      types: {
-        fundacion: "Fundación",
-        ong: "ONG",
-        movimiento_social: "Movimiento Social",
-        colectivo: "Colectivo",
-        red: "Red",
-        alianza: "Alianza"
+      continents: {
+        "américa del norte": "América del Norte",
+        "américa central": "América Central",
+        "américa del sur": "América del Sur",
+        "europa occidental": "Europa Occidental",
+        "áfrica subsahariana": "África Subsahariana",
+        "áfrica del norte": "África del Norte",
+        "oriente medio": "Oriente Medio",
+        "asia central": "Asia Central",
+        "todas": "Todas las regiones"
       },
       focuses: {
         justicia_climatica: "Justicia Climática",
         conservacion: "Conservación",
         transicion_energetica: "Transición Energética",
-        comunidades_indigenas: "Comunidades Indígenas",
-        ciudades_sustentables: "Ciudades Sustentables",
-        soberania_alimentaria: "Soberanía Alimentaria",
         democracia: "Democracia",
         justicia_genero: "Justicia de Género",
         justicia_racial: "Justicia Racial",
         justicia_economica: "Justicia Económica",
         salud_global: "Salud Global",
         educacion: "Educación de Calidad",
-        derechos_infancias: "Derechos de las Infancias",
-        juventud: "Juventud",
-        lgbtiq: "LGBTIQ+",
-        innovacion_social: "Innovación Social",
-        paz_conflictos: "Paz y Resolución de Conflictos",
-        participacion_ciudadana: "Participación Ciudadana",
-        gobernanza_global: "Gobernanza Global",
-        proteccion_ninez: "Protección de la Niñez"
       }
     },
     en: {
-      title: "Organizations Map",
+      title: "Re-action map",
       filters: "Filters",
       hideFilters: "Hide Filters",
       showFilters: "Show Filters",
-      regions: "Regions",
-      hideRegions: "Hide Regions",
-      showRegions: "Show Regions",
       organizations: "organizations",
       filteredBy: "Filtered by",
-      type: "Type",
       focus: "Focus",
       country: "Country",
       financialImpact: "Financial Impact",
-      allTypes: "All types",
       allFocus: "All focuses",
       allCountries: "All countries",
       allContinents: "All continents",
@@ -13254,65 +13308,70 @@ export default function Dashboard() {
       mapView: "Map View",
       listView: "List View",
       viewDetails: "View details",
-      types: {
-        fundacion: "Foundation",
-        ong: "NGO",
-        movimiento_social: "Social Movement",
-        colectivo: "Collective",
-        red: "Network",
-        alianza: "Alliance"
+      continents: {
+        "north america": "North America",
+        "central america": "Central America",
+        "south america": "South America",
+        "western europe": "Western Europe",
+        "sub-saharan africa": "Sub-Saharan Africa",
+        "north africa": "North Africa",
+        "middle east": "Middle East",
+        "central asia": "Central Asia",
+        "all regions": "All Regions"
       },
       focuses: {
         justicia_climatica: "Climate Justice",
         conservacion: "Conservation",
         transicion_energetica: "Energy Transition",
-        comunidades_indigenas: "Indigenous Communities",
-        ciudades_sustentables: "Sustainable Cities",
-        soberania_alimentaria: "Food Sovereignty",
         democracia: "Democracy",
         justicia_genero: "Gender Justice",
         justicia_racial: "Racial Justice",
         justicia_economica: "Economic Justice",
         salud_global: "Global Health",
         educacion: "Quality Education",
-        derechos_infancias: "Children's Rights",
-        juventud: "Youth",
-        lgbtiq: "LGBTIQ+",
-        innovacion_social: "Social Innovation",
-        paz_conflictos: "Peace and Conflict Resolution",
-        participacion_ciudadana: "Citizen Participation",
-        gobernanza_global: "Global Governance",
-        proteccion_ninez: "Child Protection"
       }
     }
   };
 
   const t = translations[language];
 
-  const handleClearRegion = () => {
-    setSelectedRegion(null);
-    setMapCenter([20, 0]);
-    setMapZoom(2);
-    setFilters({ ...filters, continent: "all", country: "all" });
-  };
-
-  const filteredOrgs = useMemo(() => {
+const filteredOrgs = useMemo(() => {
     return organizationsData.filter(org => {
-      // Filtro de búsqueda por nombre
       if (searchQuery && !org.name.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
       
-      if (filters.type !== "all" && org.type !== filters.type) return false;
-      if (filters.focus !== "all" && org.focus !== filters.focus) return false;
+      // Filtro de enfoque - busca si el enfoque está en el string de enfoques
+      if (filters.focus !== "all") {
+        const orgFocusText = language === 'es' ? (org.enfoque?.es || org.enfoque) : (org.enfoque?.en || org.enfoque);
+        const focusLabel = t.focuses[filters.focus];
+        if (!orgFocusText || !orgFocusText.toLowerCase().includes(focusLabel.toLowerCase())) {
+          return false;
+        }
+      }
+      
+      // Filtro de impacto financiero por continente - CORREGIDO
+      if (filters.financialImpact !== "all") {
+        let impactText = language === 'es' ? (org.impacto_financiero?.es || org.impacto_financiero) : (org.impacto_financiero?.en || org.impacto_financiero);
+        
+        // Convertir a string si es un objeto o null/undefined
+        if (typeof impactText !== 'string') {
+          impactText = '';
+        }
+        
+        if (!impactText || !impactText.toLowerCase().includes(filters.financialImpact.toLowerCase())) {
+          return false;
+        }
+      }
+      
       if (filters.continent !== "all" && org.continent !== filters.continent) return false;
       if (filters.country !== "all" && org.country !== filters.country) return false;
-      if (filters.financialImpact !== "all" && org.continent !== filters.financialImpact) return false;
       return true;
     });
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, language, t.focuses]);
 
   // Filtrar países basándose en la búsqueda
+  const ALL_COUNTRIES = Object.keys(COUNTRY_COORDINATES).sort();
   const filteredCountries = useMemo(() => {
     if (!countrySearch) return ALL_COUNTRIES;
     return ALL_COUNTRIES.filter(country => 
@@ -13379,14 +13438,6 @@ export default function Dashboard() {
           cursor: pointer !important;
         }
         
-        .leaflet-tile-container {
-          opacity: 1;
-        }
-        
-        body.modal-open {
-          overflow: hidden;
-        }
-        
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -13406,43 +13457,50 @@ export default function Dashboard() {
       <div className="max-w-[1600px] mx-auto mb-6">
         <div className="rounded-3xl p-6 md:p-8 shadow-lg" style={{ backgroundColor: '#FFFFFF' }}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2 font-cursive" style={{ color: '#0F172A' }}>
+            <div className="text-center flex-1">
+              <h1 
+                className="text-2xl md:text-3xl font-bold mb-2"
+                style={{ 
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  color: '#0F172A',
+                  letterSpacing: '0px',
+                  fontWeight: '900',
+                  textTransform: 'uppercase'
+                }}
+              >
                 {t.title}
               </h1>
             </div>
             
-            <div className="flex gap-3">
-              <div className="rounded-2xl p-1 flex gap-1" style={{ backgroundColor: '#E5E7EB' }}>
-                <button
-                  onClick={() => setLanguage('es')}
-                  className={`px-4 py-2 rounded-xl transition-all font-medium ${
-                    language === 'es' ? 'shadow' : ''
-                  }`}
-                  style={language === 'es' ? {
-                    backgroundColor: '#FFFFFF',
-                    color: '#0F172A'
-                  } : {
-                    color: '#0F172A'
-                  }}
-                >
-                  ES
-                </button>
-                <button
-                  onClick={() => setLanguage('en')}
-                  className={`px-4 py-2 rounded-xl transition-all font-medium ${
-                    language === 'en' ? 'shadow' : ''
-                  }`}
-                  style={language === 'en' ? {
-                    backgroundColor: '#FFFFFF',
-                    color: '#0F172A'
-                  } : {
-                    color: '#0F172A'
-                  }}
-                >
-                  EN
-                </button>
-              </div>
+            <div className="rounded-2xl p-1 flex gap-1" style={{ backgroundColor: '#E5E7EB' }}>
+              <button
+                onClick={() => setLanguage('es')}
+                className={`px-4 py-2 rounded-xl transition-all font-medium ${
+                  language === 'es' ? 'shadow' : ''
+                }`}
+                style={language === 'es' ? {
+                  backgroundColor: '#FFFFFF',
+                  color: '#0F172A'
+                } : {
+                  color: '#0F172A'
+                }}
+              >
+                ES
+              </button>
+              <button
+                onClick={() => setLanguage('en')}
+                className={`px-4 py-2 rounded-xl transition-all font-medium ${
+                  language === 'en' ? 'shadow' : ''
+                }`}
+                style={language === 'en' ? {
+                  backgroundColor: '#FFFFFF',
+                  color: '#0F172A'
+                } : {
+                  color: '#0F172A'
+                }}
+              >
+                EN
+              </button>
             </div>
           </div>
           
@@ -13480,21 +13538,8 @@ export default function Dashboard() {
                 color: '#0F172A'
               }}
             >
-              <Filter className="w-5 h-5" style={{ color: '#22C55E' }} />
-              {showFilters ? t.hideFilters : t.showFilters}
-            </button>
-
-            <button
-              onClick={() => setShowRegionSelector(!showRegionSelector)}
-              className="rounded-xl px-4 py-3 flex items-center gap-2 transition-all hover:opacity-90"
-              style={{
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #E5E7EB',
-                color: '#0F172A'
-              }}
-            >
               <Layers className="w-5 h-5" style={{ color: '#22C55E' }} />
-              {showRegionSelector ? t.hideRegions : t.showRegions}
+              {showFilters ? t.hideFilters : t.showFilters}
             </button>
 
             {/* Botones de vista */}
@@ -13523,23 +13568,6 @@ export default function Dashboard() {
               <List className="w-5 h-5" />
               {t.listView}
             </button>
-
-            {selectedRegion && (
-              <div className="px-4 py-3 rounded-xl flex items-center gap-2" style={{
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #22C55E'
-              }}>
-                <span className="text-sm font-semibold" style={{ color: '#0F172A' }}>{t.filteredBy}:</span>
-                <span className="text-sm font-bold" style={{ color: '#22C55E' }}>{selectedRegion.name}</span>
-                <button
-                  onClick={handleClearRegion}
-                  className="ml-2 rounded-full p-1 transition-colors"
-                  style={{ backgroundColor: '#E5E7EB' }}
-                >
-                  <X className="w-4 h-4" style={{ color: '#F59E0B' }} />
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="px-6 py-3 rounded-xl flex items-center gap-2" style={{
@@ -13565,27 +13593,6 @@ export default function Dashboard() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: '#0F172A' }}>
-                    {t.type}
-                  </label>
-                  <select
-                    value={filters.type}
-                    onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                    className="w-full rounded-xl px-4 py-3 text-sm transition-all"
-                    style={{
-                      backgroundColor: '#FFFFFF',
-                      border: '2px solid #E5E7EB',
-                      color: '#0F172A'
-                    }}
-                  >
-                    <option value="all">{t.allTypes}</option>
-                    {Object.entries(t.types).map(([key, label]) => (
-                      <option key={key} value={key}>{label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#0F172A' }}>
                     {t.focus}
                   </label>
                   <select
@@ -13607,6 +13614,88 @@ export default function Dashboard() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: '#0F172A' }}>
+                    {t.country}
+                  </label>
+                  
+                  {/* Dropdown de países con search */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setCountryDropdownOpen(!countryDropdownOpen)}
+                      className="w-full rounded-xl px-4 py-3 text-sm transition-all text-left flex items-center justify-between"
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '2px solid #E5E7EB',
+                        color: '#0F172A'
+                      }}
+                    >
+                      <span>{filters.country === 'all' ? t.allCountries : filters.country}</span>
+                      <span>▼</span>
+                    </button>
+
+                    {countryDropdownOpen && (
+                      <div 
+                        className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-lg z-50 max-h-64 overflow-hidden flex flex-col"
+                        style={{ backgroundColor: '#FFFFFF', border: '2px solid #E5E7EB' }}
+                      >
+                        {/* Search input dentro del dropdown */}
+                        <div className="p-3 border-b" style={{ borderColor: '#E5E7EB' }}>
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: '#22C55E' }} />
+                            <input
+                              type="text"
+                              placeholder={t.searchCountryPlaceholder}
+                              value={countrySearch}
+                              onChange={(e) => setCountrySearch(e.target.value)}
+                              className="w-full pl-10 pr-4 py-2 rounded-lg text-sm transition-all"
+                              style={{
+                                backgroundColor: '#F9FAFB',
+                                border: '2px solid #E5E7EB',
+                                color: '#0F172A'
+                              }}
+                              autoFocus
+                            />
+                          </div>
+                        </div>
+
+                        {/* Lista de países */}
+                        <div className="overflow-y-auto">
+                          <button
+                            onClick={() => {
+                              setFilters({ ...filters, country: 'all' });
+                              setCountryDropdownOpen(false);
+                              setCountrySearch('');
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                            style={{ color: filters.country === 'all' ? '#22C55E' : '#0F172A' }}
+                          >
+                            {t.allCountries}
+                          </button>
+                          
+                          {filteredCountries.map((country) => (
+                            <button
+                              key={country}
+                              onClick={() => {
+                                setFilters({ ...filters, country });
+                                setCountryDropdownOpen(false);
+                                setCountrySearch('');
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors border-b"
+                              style={{ 
+                                color: filters.country === country ? '#22C55E' : '#0F172A',
+                                borderColor: '#E5E7EB',
+                                fontWeight: filters.country === country ? 'bold' : 'normal'
+                              }}
+                            >
+                              {country}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                    <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#0F172A' }}>
                     {t.financialImpact}
                   </label>
                   <select
@@ -13619,57 +13708,15 @@ export default function Dashboard() {
                       color: '#0F172A'
                     }}
                   >
-                    <option value="all">{t.allContinents}</option>
-                    {CONTINENTS.map((continent) => (
-                      <option key={continent.id} value={continent.id}>
-                        {language === 'es' ? continent.name_es : continent.name_en}
-                      </option>
+                    <option value="all">{language === 'es' ? 'Todas las regiones' : 'All regions'}</option>
+                    {Object.entries(t.continents).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
                     ))}
                   </select>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: '#0F172A' }}>
-                    {t.country}
-                  </label>
-                  
-                  {/* Barra de búsqueda de países */}
-                  <div className="relative mb-2">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: '#22C55E' }} />
-                    <input
-                      type="text"
-                      placeholder={t.searchCountryPlaceholder}
-                      value={countrySearch}
-                      onChange={(e) => setCountrySearch(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg text-sm transition-all"
-                      style={{
-                        backgroundColor: '#FFFFFF',
-                        border: '2px solid #E5E7EB',
-                        color: '#0F172A'
-                      }}
-                    />
-                  </div>
-                  
-                  <select
-                    value={filters.country}
-                    onChange={(e) => setFilters({ ...filters, country: e.target.value })}
-                    className="w-full rounded-xl px-4 py-3 text-sm transition-all"
-                    style={{
-                      backgroundColor: '#FFFFFF',
-                      border: '2px solid #E5E7EB',
-                      color: '#0F172A'
-                    }}
-                  >
-                    <option value="all">{t.allCountries}</option>
-                    {filteredCountries.map((country) => (
-                      <option key={country} value={country}>{country}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {(filters.type !== 'all' || filters.focus !== 'all' || filters.country !== 'all' || filters.financialImpact !== 'all') && (
+                {(filters.focus !== 'all' || filters.country !== 'all' || filters.financialImpact !== 'all') && (
                   <button
-                    onClick={() => setFilters({ type: 'all', focus: 'all', continent: 'all', country: 'all', financialImpact: 'all' })}
+                    onClick={() => setFilters({ focus: 'all', continent: 'all', country: 'all', financialImpact: 'all' })}
                     className="w-full rounded-xl py-3 font-medium transition-all hover:opacity-90"
                     style={{
                       backgroundColor: '#E5E7EB',
@@ -13686,7 +13733,7 @@ export default function Dashboard() {
           {/* Map/List Section */}
           <div className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
             {viewMode === 'list' ? (
-              /* Vista de Lista - 3-4 por fila */
+              /* Vista de Lista */
               <div className="rounded-3xl p-6 shadow-lg" style={{ backgroundColor: '#FFFFFF' }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
                   {filteredOrgs.map((org) => (
@@ -13707,15 +13754,6 @@ export default function Dashboard() {
                           <span
                             className="px-2 py-1 rounded-full text-xs font-medium"
                             style={{
-                              backgroundColor: '#E5E7EB',
-                              color: '#0F172A'
-                            }}
-                          >
-                            {language === 'es' ? (org.tipo_de_org?.es || org.tipo_de_org) : (org.tipo_de_org?.en || org.tipo_de_org)}
-                          </span>
-                          <span
-                            className="px-2 py-1 rounded-full text-xs font-medium"
-                            style={{
                               backgroundColor: '#22C55E',
                               color: '#FFFFFF'
                             }}
@@ -13728,19 +13766,6 @@ export default function Dashboard() {
                       <p className="text-sm mb-3 line-clamp-3 flex-grow" style={{ color: '#0F172A' }}>
                         {language === 'es' ? org.description_es : org.description_en}
                       </p>
-
-                      <div className="space-y-2 mb-3">
-                        {org.enfoque && (
-                          <div>
-                            <h4 className="text-xs font-semibold mb-1" style={{ color: '#22C55E' }}>
-                              {language === 'es' ? 'Enfoque' : 'Focus'}
-                            </h4>
-                            <p className="text-xs line-clamp-2" style={{ color: '#0F172A' }}>
-                              {language === 'es' ? (org.enfoque.es || org.enfoque) : (org.enfoque.en || org.enfoque)}
-                            </p>
-                          </div>
-                        )}
-                      </div>
 
                       {org.website && (
                         <div className="pt-3 mt-auto border-t" style={{ borderColor: '#E5E7EB' }}>
@@ -13763,65 +13788,30 @@ export default function Dashboard() {
               </div>
             ) : (
               /* Vista de Mapa */
-              <div className="grid lg:grid-cols-4 gap-6">
-                {/* Region Selector */}
-                {showRegionSelector && (
-                  <div className="lg:col-span-1">
-                    <div className="rounded-3xl p-6 shadow-lg space-y-4" style={{ backgroundColor: '#FFFFFF' }}>
-                      <h3 className="text-xl font-bold" style={{ color: '#0F172A' }}>{t.regions}</h3>
-                      
-                      <div className="space-y-2">
-                        {ALL_COUNTRIES.map((country) => (
-                          <button
-                            key={country}
-                            onClick={() => setFilters({ ...filters, country: country })}
-                            className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
-                              filters.country === country
-                                ? 'font-semibold'
-                                : 'hover:opacity-80'
-                            }`}
-                            style={filters.country === country ? {
-                              backgroundColor: '#22C55E',
-                              color: '#FFFFFF'
-                            } : {
-                              backgroundColor: '#E5E7EB',
-                              color: '#0F172A'
-                            }}
-                          >
-                            {country}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Map Container */}
-                <div className={showRegionSelector ? "lg:col-span-3" : "lg:col-span-4"}>
-                  <div 
-                    className="rounded-3xl overflow-hidden shadow-lg" 
-                    style={{ height: '700px', minHeight: '500px', backgroundColor: '#FFFFFF' }}
+              <div>
+                <div 
+                  className="rounded-3xl overflow-hidden shadow-lg" 
+                  style={{ height: '700px', minHeight: '500px', backgroundColor: '#FFFFFF' }}
+                >
+                  <MapContainer
+                    center={[20, 0]}
+                    zoom={2}
+                    scrollWheelZoom={true}
+                    style={{ height: "100%", width: "100%" }}
                   >
-                    <MapContainer
-                      center={mapCenter}
-                      zoom={mapZoom}
-                      scrollWheelZoom={true}
-                      style={{ height: "100%", width: "100%" }}
-                    >
-                      <ChangeView center={mapCenter} zoom={mapZoom} />
-                      <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        maxZoom={19}
-                      />
-                      
-                      <ClusteredMarkers
-                        markers={markers}
-                        onOrganizationsClick={setSelectedOrganization}
-                        language={language}
-                      />
-                    </MapContainer>
-                  </div>
+                    <ChangeView center={[20, 0]} zoom={2} />
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      maxZoom={19}
+                    />
+                    
+                    <ClusteredMarkers
+                      markers={markers}
+                      onOrganizationsClick={setSelectedOrganization}
+                      language={language}
+                    />
+                  </MapContainer>
                 </div>
               </div>
             )}
